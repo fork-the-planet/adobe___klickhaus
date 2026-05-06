@@ -9,6 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { cycleViewMode } from './logs.js';
+import { saveStateToURL } from './url-state.js';
+
 let quickLinksModal = null;
 let moreMenu = null;
 let menuBtn = null;
@@ -114,7 +117,7 @@ export function initModal() {
 
     // Delegate menu item clicks to real header buttons
     document.getElementById('moreViewToggleItem')?.addEventListener('click', () => {
-      document.getElementById('viewToggleBtn').click();
+      cycleViewMode(saveStateToURL);
     });
     document.getElementById('moreRefreshItem')?.addEventListener('click', () => {
       document.getElementById('refreshBtn').click();

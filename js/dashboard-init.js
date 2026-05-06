@@ -44,7 +44,7 @@ import {
   getFilterForValue,
 } from './filters.js';
 import {
-  loadLogs, toggleLogsView, setLogsElements, setOnShowFiltersView, setOnShowLogsView,
+  loadLogs, cycleViewMode, setViewMode, setLogsElements, setOnShowFiltersView, setOnShowLogsView,
 } from './logs.js';
 import { loadHostAutocomplete } from './autocomplete.js';
 import { initModal, closeQuickLinksModal } from './modal.js';
@@ -85,16 +85,21 @@ export function initDashboard(config = {}) {
     hostFilterInput: document.getElementById('hostFilter'),
     refreshBtn: document.getElementById('refreshBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
-    viewToggleBtn: document.getElementById('viewToggleBtn'),
+    viewCycleBtn: document.getElementById('viewCycleBtn'),
     logsView: document.getElementById('logsView'),
     filtersView: document.getElementById('filtersView'),
+    contentArea: document.getElementById('contentArea'),
     dashboardContent: document.getElementById('dashboardContent'),
   };
 
   // Pass elements to modules that need them
   setElements(elements);
   setUrlStateElements(elements);
-  setLogsElements(elements.logsView, elements.viewToggleBtn, elements.filtersView);
+  setLogsElements(
+    elements.logsView,
+    elements.filtersView,
+    elements.contentArea,
+  );
 
   // Load dashboard queries (chart and facets)
   async function loadDashboardQueries(
@@ -182,7 +187,7 @@ export function initDashboard(config = {}) {
     const timeFilter = getTimeFilter();
     const hostFilter = getHostFilter();
 
-    if (state.showLogs) {
+    if (state.viewMode === 'logs' || state.viewMode === 'split') {
       await loadLogs(dashboardContext);
       loadDashboardQueries(timeFilter, hostFilter, dashboardContext, facetsContext, refresh);
     } else {
@@ -439,7 +444,13 @@ export function initDashboard(config = {}) {
       }
     });
 
-    elements.viewToggleBtn.addEventListener('click', () => toggleLogsView(saveStateToURL));
+    elements.viewCycleBtn.addEventListener('click', () => cycleViewMode(saveStateToURL));
+
+    window.matchMedia('(max-width: 1400px)').addEventListener('change', (e) => {
+      if (e.matches && state.viewMode === 'split') {
+        setViewMode('filters', saveStateToURL);
+      }
+    });
 
     window.addEventListener('login-success', () => {
       try {
