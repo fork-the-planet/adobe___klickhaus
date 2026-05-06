@@ -525,14 +525,18 @@ function applyViewMode() {
   filtersView.classList.toggle('in-split', isSplit);
   if (contentArea) { contentArea.classList.toggle('split', isSplit); }
 
+  const modes = SPLIT_BREAKPOINT.matches ? ['filters', 'logs'] : CYCLE_MODES;
+  const nextMode = modes[(modes.indexOf(viewMode) + 1) % modes.length];
+  const meta = VIEW_META[nextMode] || VIEW_META.filters;
+
   const cycleBtn = document.getElementById('viewCycleBtn');
   if (cycleBtn) {
-    const modes = SPLIT_BREAKPOINT.matches ? ['filters', 'logs'] : CYCLE_MODES;
-    const nextMode = modes[(modes.indexOf(viewMode) + 1) % modes.length];
-    const meta = VIEW_META[nextMode] || VIEW_META.filters;
     cycleBtn.innerHTML = meta.icon;
     cycleBtn.title = meta.title;
   }
+
+  const moreLabel = document.querySelector('#moreViewToggleItem .menu-item-label');
+  if (moreLabel) { moreLabel.textContent = meta.title; }
 
   if (showLogs && onShowLogsView && !state.logsReady) {
     requestAnimationFrame(() => onShowLogsView());
