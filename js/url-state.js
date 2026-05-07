@@ -51,7 +51,7 @@ function addBasicParams(params) {
   if (state.timeRange !== DEFAULT_TIME_RANGE) { params.set('t', state.timeRange); }
   if (state.hostFilter) { params.set('host', state.hostFilter); }
   if (state.topN !== DEFAULT_TOP_N) { params.set('n', state.topN); }
-  if (state.showLogs) { params.set('view', 'logs'); }
+  if (state.viewMode !== 'filters') { params.set('view', state.viewMode); }
   if (state.title) { params.set('title', state.title); }
   if (state.contentTypeMode !== 'count') { params.set('ctm', state.contentTypeMode); }
 }
@@ -123,7 +123,8 @@ function loadBasicState(params) {
     const n = parseInt(params.get('n'), 10);
     if (TOP_N_OPTIONS.includes(n)) { state.topN = n; }
   }
-  if (params.get('view') === 'logs') { state.showLogs = true; }
+  const view = params.get('view');
+  if (view === 'logs' || view === 'split') { state.viewMode = view; }
   if (params.has('title')) { state.title = params.get('title'); }
   if (params.has('ctm') && ['count', 'bytes'].includes(params.get('ctm'))) {
     state.contentTypeMode = params.get('ctm');
@@ -219,17 +220,14 @@ export function syncUIFromState() {
     document.title = 'CDN Analytics';
   }
 
-  // Update view toggle based on state
-  if (state.showLogs) {
-    elements.logsView.classList.add('visible');
-    elements.filtersView.classList.remove('visible');
-    elements.viewToggleBtn.title = 'View Filters';
-  } else {
-    elements.logsView.classList.remove('visible');
-    elements.filtersView.classList.add('visible');
-    elements.viewToggleBtn.title = 'View Logs';
-  }
-
+  // Apply view mode to DOM
+  const { viewMode } = state;
+  const isSplit = viewMode === 'split';
+  const isLogs = viewMode === 'logs';
+  elements.logsView.classList.toggle('visible', isLogs || isSplit);
+  elements.filtersView.classList.toggle('visible', !isLogs);
+  elements.filtersView.classList.toggle('in-split', isSplit);
+  if (elements.contentArea) { elements.contentArea.classList.toggle('split', isSplit); }
   // Apply hidden controls from URL
   if (state.hiddenControls.includes('timeRange')) {
     elements.timeRangeSelect.style.display = 'none';
@@ -247,7 +245,7 @@ export function syncUIFromState() {
     elements.logoutBtn.style.display = 'none';
   }
   if (state.hiddenControls.includes('logs')) {
-    elements.viewToggleBtn.style.display = 'none';
+    if (elements.viewCycleBtn) { elements.viewCycleBtn.style.display = 'none'; }
   }
 }
 

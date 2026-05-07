@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import { DATABASE } from './config.js';
-import { state, setOnPinnedColumnsChange } from './state.js';
+import { state, setOnPinnedColumnsChange, saveViewMode } from './state.js';
 import { query, isAbortError } from './api.js';
 import { getTimeFilter, getHostFilter, getLogsTable } from './time.js';
 import { getFacetFilters } from './breakdowns/index.js';
@@ -92,8 +92,25 @@ function updatePinnedOffsets(container, pinned) {
 
 // DOM elements (set by main.js)
 let logsView = null;
-let viewToggleBtn = null;
 let filtersView = null;
+let contentArea = null;
+
+const CYCLE_MODES = ['filters', 'logs', 'split'];
+const SPLIT_BREAKPOINT = window.matchMedia('(max-width: 1400px)');
+const VIEW_META = {
+  filters: {
+    title: 'Switch to Filters view',
+    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>',
+  },
+  logs: {
+    title: 'Switch to Logs view',
+    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="14" height="14" rx="2"/><line x1="4" y1="5" x2="12" y2="5"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="4" y1="11" x2="9" y2="11"/></svg>',
+  },
+  split: {
+    title: 'Switch to Split view',
+    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="14" height="14" rx="2"/><line x1="8" y1="1" x2="8" y2="15"/></svg>',
+  },
+};
 
 // Pagination state
 const pagination = new PaginationState();
@@ -457,7 +474,7 @@ async function loadMoreLogs() {
 
 function handleLogsScroll() {
   // Only handle scroll when logs view is visible
-  if (!state.showLogs) { return; }
+  if (state.viewMode === 'filters') { return; }
 
   const { scrollHeight } = document.documentElement;
   const scrollTop = window.scrollY;
@@ -470,10 +487,10 @@ function handleLogsScroll() {
   }
 }
 
-export function setLogsElements(view, toggleBtn, filtersViewEl) {
+export function setLogsElements(view, filtersViewEl, contentAreaEl) {
   logsView = view;
-  viewToggleBtn = toggleBtn;
   filtersView = filtersViewEl;
+  contentArea = contentAreaEl;
 
   // Set up scroll listener for infinite scroll on window
   window.addEventListener('scroll', handleLogsScroll);
@@ -497,26 +514,54 @@ export function setOnShowLogsView(callback) {
   onShowLogsView = callback;
 }
 
-export function toggleLogsView(saveStateToURL) {
-  state.showLogs = !state.showLogs;
-  if (state.showLogs) {
-    logsView.classList.add('visible');
-    filtersView.classList.remove('visible');
-    viewToggleBtn.title = 'View Filters';
-    // Load logs if not already loaded
-    if (onShowLogsView && !state.logsReady) {
-      requestAnimationFrame(() => onShowLogsView());
-    }
-  } else {
-    logsView.classList.remove('visible');
-    filtersView.classList.add('visible');
-    viewToggleBtn.title = 'View Logs';
-    // Redraw chart after view becomes visible
-    if (onShowFiltersView) {
-      requestAnimationFrame(() => onShowFiltersView());
-    }
+export function applyViewMode() {
+  const { viewMode } = state;
+  const isSplit = viewMode === 'split';
+  const isLogs = viewMode === 'logs';
+  const showLogs = isLogs || isSplit;
+
+  logsView.classList.toggle('visible', showLogs);
+  filtersView.classList.toggle('visible', !isLogs);
+  filtersView.classList.toggle('in-split', isSplit);
+  if (contentArea) { contentArea.classList.toggle('split', isSplit); }
+
+  const modes = SPLIT_BREAKPOINT.matches ? ['filters', 'logs'] : CYCLE_MODES;
+  const nextMode = modes[(modes.indexOf(viewMode) + 1) % modes.length];
+  const meta = VIEW_META[nextMode] || VIEW_META.filters;
+
+  const cycleBtn = document.getElementById('viewCycleBtn');
+  if (cycleBtn) {
+    cycleBtn.innerHTML = meta.icon;
+    cycleBtn.title = meta.title;
   }
+
+  const moreLabel = document.querySelector('#moreViewToggleItem .menu-item-label');
+  if (moreLabel) { moreLabel.textContent = meta.title; }
+
+  if (showLogs && onShowLogsView && !state.logsReady) {
+    requestAnimationFrame(() => onShowLogsView());
+  }
+  if (viewMode !== 'logs' && onShowFiltersView) {
+    requestAnimationFrame(() => onShowFiltersView());
+  }
+}
+
+export function setViewMode(mode, saveStateToURL) {
+  state.viewMode = mode;
+  saveViewMode(mode);
+  applyViewMode();
   saveStateToURL();
+}
+
+export function cycleViewMode(saveStateToURL) {
+  const modes = SPLIT_BREAKPOINT.matches ? ['filters', 'logs'] : CYCLE_MODES;
+  const next = modes[(modes.indexOf(state.viewMode) + 1) % modes.length];
+  setViewMode(next, saveStateToURL);
+}
+
+/** @deprecated use setViewMode / cycleViewMode */
+export function toggleLogsView(saveStateToURL) {
+  cycleViewMode(saveStateToURL);
 }
 
 export async function loadLogs(requestContext = getRequestContext('dashboard')) {

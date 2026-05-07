@@ -92,7 +92,7 @@ header h1 {
     font-size: 16px;
   }
 
-  #viewToggleBtn,
+  .kbd-control:has(#viewCycleBtn),
   #refreshBtn,
   #logoutBtn {
     display: none;
@@ -251,5 +251,37 @@ main {
 @media (max-width: 600px) {
   main {
     padding: 0 12px 16px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .kbd-control:has(#viewCycleBtn) {
+    display: none;
+  }
+}
+
+/* Split View Layout */
+#contentArea.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Allow grid children to shrink below content size so overflow-x works */
+#contentArea.split #filtersView,
+#contentArea.split #logsView {
+  min-width: 0;
+}
+
+/* Remove top padding so table and filter cards align at the top */
+#contentArea.split #logsView {
+  padding-top: 0;
+}
+
+/* Below split threshold: stack vertically */
+@media (max-width: 1500px) {
+  #contentArea.split {
+    display: block;
   }
 }

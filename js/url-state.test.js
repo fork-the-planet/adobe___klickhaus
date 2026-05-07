@@ -27,7 +27,7 @@ function resetState() {
   state.hostFilter = '';
   state.topN = DEFAULT_TOP_N;
   state.filters = [];
-  state.showLogs = false;
+  state.viewMode = 'filters';
   state.title = '';
   state.contentTypeMode = 'count';
   state.hiddenControls = [];
@@ -137,22 +137,28 @@ describe('loadStateFromURL', () => {
   });
 
   describe('view mode', () => {
-    it('sets showLogs when view=logs', () => {
+    it('sets viewMode to logs when view=logs', () => {
       setURL({ view: 'logs' });
       loadStateFromURL();
-      assert.strictEqual(state.showLogs, true);
+      assert.strictEqual(state.viewMode, 'logs');
     });
 
-    it('does not set showLogs for other values', () => {
+    it('sets viewMode to split when view=split', () => {
+      setURL({ view: 'split' });
+      loadStateFromURL();
+      assert.strictEqual(state.viewMode, 'split');
+    });
+
+    it('keeps default viewMode for other values', () => {
       setURL({ view: 'other' });
       loadStateFromURL();
-      assert.strictEqual(state.showLogs, false);
+      assert.strictEqual(state.viewMode, 'filters');
     });
 
-    it('does not set showLogs when absent', () => {
+    it('keeps default viewMode when absent', () => {
       setURL({});
       loadStateFromURL();
-      assert.strictEqual(state.showLogs, false);
+      assert.strictEqual(state.viewMode, 'filters');
     });
   });
 
@@ -390,7 +396,7 @@ describe('loadStateFromURL', () => {
       assert.strictEqual(state.timeRange, '7d');
       assert.strictEqual(state.hostFilter, 'cdn.example.com');
       assert.strictEqual(state.topN, 20);
-      assert.strictEqual(state.showLogs, true);
+      assert.strictEqual(state.viewMode, 'logs');
       assert.strictEqual(state.title, 'Test Dashboard');
       assert.strictEqual(state.filters.length, 1);
     });
@@ -493,15 +499,22 @@ describe('saveStateToURL', () => {
     assert.strictEqual(new Date(params.get('ts')).toISOString(), '2026-01-20T12:00:00.000Z');
   });
 
-  it('encodes showLogs as view=logs', () => {
-    state.showLogs = true;
+  it('encodes logs viewMode as view=logs', () => {
+    state.viewMode = 'logs';
     saveStateToURL();
     const params = new URLSearchParams(window.location.search);
     assert.strictEqual(params.get('view'), 'logs');
   });
 
-  it('omits view param when showLogs is false', () => {
-    state.showLogs = false;
+  it('encodes split viewMode as view=split', () => {
+    state.viewMode = 'split';
+    saveStateToURL();
+    const params = new URLSearchParams(window.location.search);
+    assert.strictEqual(params.get('view'), 'split');
+  });
+
+  it('omits view param when viewMode is filters', () => {
+    state.viewMode = 'filters';
     saveStateToURL();
     const params = new URLSearchParams(window.location.search);
     assert.isFalse(params.has('view'));
@@ -642,7 +655,7 @@ describe('saveStateToURL and loadStateFromURL round-trip', () => {
     state.timeRange = '24h';
     state.hostFilter = 'example.com';
     state.topN = 20;
-    state.showLogs = true;
+    state.viewMode = 'logs';
     state.title = 'Test';
     state.contentTypeMode = 'bytes';
     state.filters = [{ col: '`request.host`', value: 'test.com', exclude: false }];
@@ -660,7 +673,7 @@ describe('saveStateToURL and loadStateFromURL round-trip', () => {
     assert.strictEqual(state.timeRange, '24h');
     assert.strictEqual(state.hostFilter, 'example.com');
     assert.strictEqual(state.topN, 20);
-    assert.strictEqual(state.showLogs, true);
+    assert.strictEqual(state.viewMode, 'logs');
     assert.strictEqual(state.title, 'Test');
     assert.strictEqual(state.contentTypeMode, 'bytes');
     assert.strictEqual(state.filters.length, 1);
@@ -726,7 +739,8 @@ describe('syncUIFromState', () => {
       hostFilterInput: document.createElement('input'),
       logsView: document.createElement('div'),
       filtersView: document.createElement('div'),
-      viewToggleBtn: document.createElement('button'),
+      contentArea: document.createElement('div'),
+      viewCycleBtn: document.createElement('button'),
       refreshBtn: document.createElement('button'),
       logoutBtn: document.createElement('button'),
     };
@@ -794,20 +808,26 @@ describe('syncUIFromState', () => {
     assert.strictEqual(document.title, 'CDN Analytics');
   });
 
-  it('shows logs view when showLogs is true', () => {
-    state.showLogs = true;
+  it('shows logs view when viewMode is logs', () => {
+    state.viewMode = 'logs';
     syncUIFromState();
     assert.isTrue(mockElements.logsView.classList.contains('visible'));
     assert.isFalse(mockElements.filtersView.classList.contains('visible'));
-    assert.strictEqual(mockElements.viewToggleBtn.title, 'View Filters');
   });
 
-  it('shows filters view when showLogs is false', () => {
-    state.showLogs = false;
+  it('shows filters view when viewMode is filters', () => {
+    state.viewMode = 'filters';
     syncUIFromState();
     assert.isFalse(mockElements.logsView.classList.contains('visible'));
     assert.isTrue(mockElements.filtersView.classList.contains('visible'));
-    assert.strictEqual(mockElements.viewToggleBtn.title, 'View Logs');
+  });
+
+  it('shows both panels in split view', () => {
+    state.viewMode = 'split';
+    syncUIFromState();
+    assert.isTrue(mockElements.logsView.classList.contains('visible'));
+    assert.isTrue(mockElements.filtersView.classList.contains('visible'));
+    assert.isTrue(mockElements.contentArea.classList.contains('split'));
   });
 
   it('hides controls based on hiddenControls', () => {
@@ -818,7 +838,7 @@ describe('syncUIFromState', () => {
     assert.strictEqual(mockElements.hostFilterInput.style.display, 'none');
     assert.strictEqual(mockElements.refreshBtn.style.display, 'none');
     assert.strictEqual(mockElements.logoutBtn.style.display, 'none');
-    assert.strictEqual(mockElements.viewToggleBtn.style.display, 'none');
+    assert.strictEqual(mockElements.viewCycleBtn.style.display, 'none');
   });
 
   it('does not hide controls when hiddenControls is empty', () => {

@@ -5,7 +5,7 @@
 
 .breakdowns {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
 }
 
@@ -16,18 +16,6 @@
   border: 1px solid var(--border);
   transition: filter 0.2s ease-out, opacity 0.2s ease;
   position: relative;
-}
-
-@media (max-width: 1400px) {
-  .breakdowns {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 1000px) {
-  .breakdowns {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 600px) {
@@ -61,23 +49,6 @@
   }
 }
 
-@media (min-width: 1800px) {
-  .breakdowns {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-@media (min-width: 2200px) {
-  .breakdowns {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
-@media (min-width: 2600px) {
-  .breakdowns {
-    grid-template-columns: repeat(7, 1fr);
-  }
-}
 
 .breakdown-card.updating {
   filter: blur(2px);

@@ -28,7 +28,7 @@ export const state = {
   logsData: null,
   logsLoading: false,
   logsReady: false,
-  showLogs: false,
+  viewMode: storage.getItem('viewMode') || 'filters', // 'filters' | 'logs' | 'split'
   pinnedColumns: JSON.parse(storage.getItem('pinnedColumns') || '[]'),
   hiddenControls: [], // ['timeRange', 'topN', 'host', 'refresh', 'logout', 'logs']
   title: '', // Custom title from URL
@@ -45,6 +45,10 @@ export const state = {
   hostFilterColumn: null, // Optional column for header filter (e.g. function_name for lambda)
   breakdowns: null, // Optional override breakdown list (e.g. lambda facets)
 };
+
+export function saveViewMode(mode) {
+  storage.setItem('viewMode', mode);
+}
 
 // Callback for re-rendering logs table when pinned columns change
 // Set by logs.js to avoid circular dependencies
