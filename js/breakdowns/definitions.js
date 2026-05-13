@@ -90,6 +90,9 @@ export const allBreakdowns = [
     id: 'breakdown-tech-stack', col: COLUMN_DEFS.backendType.facetCol, facetName: 'backend_type', modeToggle: 'contentTypeMode',
   },
   {
+    id: 'breakdown-tier', col: '`helix.contentbus_prefix`', facetName: 'tier', extraFilter: "AND `helix.contentbus_prefix` != ''", summaryCountIf: "`helix.contentbus_prefix` = 'live'", summaryDimCondition: "dim = 'live'", summaryLabel: 'live',
+  },
+  {
     id: 'breakdown-methods', col: COLUMN_DEFS.method.facetCol, facetName: 'method', summaryCountIf: "`request.method` IN ('POST', 'PUT', 'PATCH', 'DELETE')", summaryDimCondition: "dim IN ('POST', 'PUT', 'PATCH', 'DELETE')", summaryLabel: 'writes', summaryColor: 'warning',
   },
   {
