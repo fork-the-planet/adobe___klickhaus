@@ -58,7 +58,7 @@ GRANT INSERT, ALTER DELETE,
           `request.headers.x_byo_cdn_type`,
           `response.status`, `response.headers.content_type`, `response.headers.x_error`,
           `cdn.cache_status`, `cdn.datacenter`,
-          `helix.request_type`, `helix.backend_type`
+          `helix.request_type`, `helix.backend_type`, `helix.contentbus_prefix`
       )
 ON helix_logs_production.delivery TO logpush_writer;
 
