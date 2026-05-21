@@ -113,6 +113,7 @@ header h1 {
   #hostFilter { order: 2; flex: 1; min-width: 0; width: auto; }
   #timeRange { order: 3; flex: 1; min-width: 0; width: auto; }
   #moreBtn { order: 4; display: flex; }
+  #manageColumnsBtn { order: 5; }
 
   /* Hide these on mobile */
   #topN,
