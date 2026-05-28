@@ -23,7 +23,7 @@
  */
 
 /** @type {string[]} */
-export const TIME_RANGE_ORDER = ['15m', '1h', '12h', '24h', '3d', '7d'];
+export const TIME_RANGE_ORDER = ['15m', '1h', '12h', '24h', '3d', '7d', '14d'];
 
 /** @type {Record<string, TimeRangeDefinition>} */
 export const TIME_RANGES = {
@@ -73,12 +73,21 @@ export const TIME_RANGES = {
     cacheTtl: 1800,
   },
   '7d': {
-    label: 'Last 7 days',
+    label: 'Last week',
     shortLabel: '7d',
     interval: 'INTERVAL 7 DAY',
     bucket: 'toStartOfTenMinutes(timestamp)',
     step: 'INTERVAL 10 MINUTE',
     periodMs: 7 * 24 * 60 * 60 * 1000,
+    cacheTtl: 1800,
+  },
+  '14d': {
+    label: 'Last 2 weeks',
+    shortLabel: '14d',
+    interval: 'INTERVAL 14 DAY',
+    bucket: 'toStartOfInterval(timestamp, INTERVAL 20 MINUTE)',
+    step: 'INTERVAL 20 MINUTE',
+    periodMs: 14 * 24 * 60 * 60 * 1000,
     cacheTtl: 1800,
   },
 };

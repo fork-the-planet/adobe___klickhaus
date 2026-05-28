@@ -60,7 +60,7 @@ describe('loadStateFromURL', () => {
     });
 
     it('loads all valid time ranges', () => {
-      for (const key of ['15m', '1h', '12h', '24h', '3d', '7d']) {
+      for (const key of ['15m', '1h', '12h', '24h', '3d', '7d', '14d']) {
         resetState();
         setURL({ t: key });
         loadStateFromURL();
@@ -718,7 +718,7 @@ describe('syncUIFromState', () => {
 
     // Create mock DOM elements
     const timeSelect = document.createElement('select');
-    ['15m', '1h', '12h', '24h', '3d', '7d', 'custom'].forEach((v) => {
+    ['15m', '1h', '12h', '24h', '3d', '7d', '14d', 'custom'].forEach((v) => {
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v;
