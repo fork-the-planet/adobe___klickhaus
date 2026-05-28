@@ -80,7 +80,7 @@ The dashboard state can be controlled via URL parameters for bookmarking and sha
 
 | Parameter | Description                                       | Example                                                                     |
 | --------- | ------------------------------------------------- | --------------------------------------------------------------------------- |
-| `t`       | Time range: `15m`, `1h`, `12h`, `24h`, `3d`, `7d` | `?t=24h`                                                                    |
+| `t`       | Time range: `15m`, `1h`, `12h`, `24h`, `3d`, `7d`, `14d` | `?t=24h`                                                             |
 | `n`       | Top N facet values: `5`, `10`, `20`, `50`, `100`  | `?n=20`                                                                     |
 | `host`    | Filter by host (substring match)                  | `?host=example.com`                                                         |
 | `view`    | View mode: `logs` for logs table                  | `?view=logs`                                                                |

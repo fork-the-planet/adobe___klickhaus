@@ -421,8 +421,8 @@ describe('zoomOut', () => {
     assert.strictEqual(result.timeRange, '1h');
   });
 
-  it('returns null when already at 7d (largest range)', () => {
-    state.timeRange = '7d';
+  it('returns null when already at 14d (largest range)', () => {
+    state.timeRange = '14d';
     clearCustomTimeRange();
     setQueryTimestamp(new Date('2026-01-20T12:34:56Z'));
     const result = zoomOut();
