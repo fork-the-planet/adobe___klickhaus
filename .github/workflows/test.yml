@@ -21,9 +21,11 @@ jobs:
         run: npm install
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run tests
+        timeout-minutes: 15
         run: npm test
 
       - name: Upload coverage report
