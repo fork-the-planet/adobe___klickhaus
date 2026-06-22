@@ -31,7 +31,7 @@ import { emailToUsername, isValidUsername } from '../js/username.js';
 import { validateBaseUrl } from '../js/iforgot-url.js';
 
 const CLICKHOUSE_HOST = 's2p5b8wmt5.eastus2.azure.clickhouse.cloud';
-const CLICKHOUSE_PORT = 8443;
+const CLICKHOUSE_PORT = 443;
 const DEFAULT_BASE_URL = 'https://klickhaus.aemstatus.net/reset-password.html';
 const DEFAULT_TTL_MINUTES = 24 * 60;
 

@@ -17,7 +17,7 @@
  */
 
 const CLICKHOUSE_HOST = 's2p5b8wmt5.eastus2.azure.clickhouse.cloud';
-const CLICKHOUSE_PORT = 8443;
+const CLICKHOUSE_PORT = 443;
 
 function generatePassword(length = 16) {
   const lower = 'abcdefghijklmnopqrstuvwxyz';

@@ -12,14 +12,15 @@
  * governing permissions and limitations under the License.
  */
 /**
- * Grant SELECT on site_configs, profile_configs, org_configs to all *_adobe_com users.
+ * Grant SELECT on site_configs, profile_configs, org_configs, site_configs_resolved
+ * to all *_adobe_com users.
  * Usage: node grant-config-tables.mjs <admin-user> <admin-password>
  */
 
 const CLICKHOUSE_HOST = 's2p5b8wmt5.eastus2.azure.clickhouse.cloud';
-const CLICKHOUSE_PORT = 8443;
+const CLICKHOUSE_PORT = 443;
 const DATABASE = 'helix_logs_production';
-const CONFIG_TABLES = ['site_configs', 'profile_configs', 'org_configs'];
+const CONFIG_TABLES = ['site_configs', 'profile_configs', 'org_configs', 'site_configs_resolved'];
 
 async function runQuery(sql, adminUser, adminPassword) {
   const url = `https://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/`;
